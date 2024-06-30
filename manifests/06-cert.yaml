@@ -13,6 +13,7 @@ spec:
   secretName: server-tls
   commonName: api
   dnsNames:
+    - api
     - api.secure.svc
     - api.secure.svc.cluster.local
   issuerRef:
