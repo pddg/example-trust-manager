@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tls-server
+  namespace: secure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tls-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tls-server
+    spec:
+      containers:
+        - name: server
+          image: tls-example-server:latest
+          imagePullPolicy: Never
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          ports:
+            - containerPort: 8000
+          env:
+            - name: TLS_CERT
+              value: /server-tls/tls.crt
+            - name: TLS_KEY
+              value: /server-tls/tls.key
+          volumeMounts:
+            - mountPath: /server-tls
+              name: server-tls
+              readOnly: true
+          # Unfortunately, kubernetes does not suppot TLS in probe.
+          # livenessProbe:
+          #   grpc:
+          #     port: 8000
+      volumes:
+        - secret:
+            secretName: server-tls
+          name: server-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: secure
+spec:
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 443
+      targetPort: 8000
+  selector:
+    app.kubernetes.io/name: tls-server

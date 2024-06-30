@@ -1,0 +1,19 @@
+FROM ubuntu:24.04
+
+ARG TARGETARCH
+ARG GRPCURL_VERSION=1.9.1
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+        wget \
+        ca-certificates \
+ && wget "https://github.com/fullstorydev/grpcurl/releases/download/v${GRPCURL_VERSION}/grpcurl_${GRPCURL_VERSION}_linux_${TARGETARCH}.deb" \
+ && apt-get install ./grpcurl_${GRPCURL_VERSION}_linux_${TARGETARCH}.deb \
+ && rm grpcurl_${GRPCURL_VERSION}_linux_${TARGETARCH}.deb \
+ && apt-get remove --purge -y \
+        wget \
+        ca-certificates \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/list
+
+USER 10000

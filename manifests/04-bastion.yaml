@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bastion
+spec:
+  containers:
+    - name: bastion
+      image: tls-example-bastion:latest
+      imagePullPolicy: Never
+      command:
+        - sleep
+        - infinity
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+      volumeMounts:
+        - mountPath: /internal-ca-bundle
+          name: internal-ca-bundle
+          readOnly: true
+  volumes:
+    - configMap:
+        name: internal-ca-bundle
+      name: internal-ca-bundle
